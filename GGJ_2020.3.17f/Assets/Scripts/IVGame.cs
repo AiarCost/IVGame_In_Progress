@@ -75,7 +75,13 @@ public class IVGame : MonoBehaviour
     public List<SpriteRenderer> orders;
     public List<String> orderColors;
     public string currentOrderColor;
+    public List<String> TempColors;
     string[] colours = { "Red", "Blue", "Yellow", "Orange", "Purple", "Green", "Vermillion", "Amber", "Chartreuse", "Teal", "Violet", "Magenta" };
+
+
+    //Check win conditions
+    int CompletedColors = 0;
+    int AmountToFinish;
 
     void Start()
     {
@@ -181,6 +187,8 @@ public class IVGame : MonoBehaviour
 
     public void resetOrders()
     {
+        CompletedColors = 0;
+        orderColors.Clear();
         foreach (SpriteRenderer o in orders)
         {
             o.enabled = false;
@@ -188,23 +196,47 @@ public class IVGame : MonoBehaviour
 
         if (level1Difficulty)
         {
+
+            AmountToFinish = 4;
+            TempColors.Clear();
+            for( int i = 0; i < colours.Length; i++)
+            {
+                TempColors.Add(colours[i]);
+            }
+
             for (int i = 0; i < 4; i++)
             {
                 orders[i].enabled = true;
-                string tempColor = getRandomColor();
+                string tempColor;
+                int tempI = UnityEngine.Random.Range(0, TempColors.Count);
+                tempColor = TempColors[tempI];
+
+                TempColors.RemoveAt(tempI);
+                currentOrderColor = tempColor;
+
                 orders[i].color = GetColor(tempColor);
                 currentOrderColor = tempColor;
                 Debug.Log(currentOrderColor);
                 orderColors.Add(currentOrderColor);
-                Debug.Log(orderColors[i]);
+
             }
         }
         else
         {
+            TempColors.Clear();
+            for (int i = 0; i < colours.Length; i++)
+            {
+                TempColors.Add(colours[i]);
+            }
+
             for (int i = 0; i < 6; i++)
             {
                 orders[i].enabled = true;
-                string tempColor = getRandomColor();
+                string tempColor;
+                int tempI = UnityEngine.Random.Range(0, TempColors.Count);
+                tempColor = TempColors[tempI];
+                TempColors.RemoveAt(tempI);
+
                 orders[i].color = GetColor(tempColor);
                 currentOrderColor = tempColor;
                 orderColors.Add(currentOrderColor);
@@ -213,9 +245,10 @@ public class IVGame : MonoBehaviour
         }
     }
 
-    public string getRandomColor()
+    public string getRandomColor(string [] UniqueColorList)
     {
-        string newColor = colours[UnityEngine.Random.Range(0, colours.Length)];
+        string newColor;
+        newColor = UniqueColorList[UnityEngine.Random.Range(0, UniqueColorList.Length)];
         currentOrderColor = newColor;
         return newColor;
     }
@@ -291,17 +324,22 @@ public class IVGame : MonoBehaviour
         int i = 0;
         foreach (String o in orderColors)
         {
-            Debug.Log(i);
+            //Debug.Log(i);
             if (currentColor == o)
             {
                 Debug.Log("Removing color");
                 orders[i].enabled = false;
-                orderColors.RemoveAt(i);
+                orderColors[i] = "________";
                 ivbagRef.emptyIV();
-                i++;
+                CompletedColors++;
                 break;
             }
+            i++;
         }
+
+        if (CompletedColors == AmountToFinish)
+            Win();
+
     }
     public void print()
     {
@@ -309,6 +347,11 @@ public class IVGame : MonoBehaviour
         {
             Debug.Log(orderColors[i]);
         }
+    }
+
+    public void Win()
+    {
+        Debug.Log("You Finished!");
     }
 }
 
